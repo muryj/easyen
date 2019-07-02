@@ -10,7 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import GoogleButton from 'react-google-button';
 import { makeStyles } from '@material-ui/core/styles';
-import firebase from '../firebase';
+import firebase from './FireBase/firebase';
 
 const useStyles = makeStyles(theme => ({
   paper: {

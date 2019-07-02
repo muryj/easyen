@@ -1,10 +1,10 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
+import { Link } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import { makeStyles } from '@material-ui/core/styles';
+import * as ROUTES from '../constants/routes';
 
 
 const useStyles = makeStyles(theme => ({
@@ -13,8 +13,8 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'center',
     flex: 1,
-    height: '10vh',
-    zIndex:1
+    maxHeight: '10vh',
+    zIndex: 1,
   },
   toolbar: {
     flexWrap: 'wrap',
@@ -32,21 +32,16 @@ export default function Header(props) {
   return (
     <AppBar position="static" color="default" elevation={1} className={styles.appBar}>
       <Toolbar className={styles.toolbar}>
-        <Typography variant="h6" color="inherit" noWrap className={styles.toolbarTitle}>
-          Company name
-        </Typography>
+        <Link to={ROUTES.LANDING} variant="button" color="textPrimary" href="#" noWrap className={styles.toolbarTitle}>
+          easyEN
+        </Link>
         <nav>
-          <Link variant="button" color="textPrimary" href="#" className={styles.link}>
-            Features
-          </Link>
-          <Link variant="button" color="textPrimary" href="#" className={styles.link}>
-            Enterprise
-          </Link>
-          <Link variant="button" color="textPrimary" href="#" className={styles.link}>
-            Support
+          <Link to={ROUTES.COURSES} variant="button" color="textPrimary" href="#" className={styles.link}>
+            Курсы
           </Link>
         </nav>
-        <Button href="#" color="primary" variant="outlined" className={styles.link} onClick={()=>props.toggleSignIn()}>
+        <Button href="#" color="primary" variant="outlined" className={styles.link}
+                onClick={() => props.toggleSignIn()}>
           Login
         </Button>
       </Toolbar>
