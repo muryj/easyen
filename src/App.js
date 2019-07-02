@@ -18,6 +18,7 @@ function App() {
     toggleSignIn(!displaySignIn);
   }
 
+  console.log(displaySignIn);
   return (
     <div className="App">
       <Slide direction="right" in={displaySignIn} timeout={1000} style={{ position: 'absolute', zIndex: 2 }}>

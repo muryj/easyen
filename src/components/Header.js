@@ -32,7 +32,7 @@ export default function Header(props) {
   return (
     <AppBar position="static" color="default" elevation={1} className={styles.appBar}>
       <Toolbar className={styles.toolbar}>
-        <Link to={ROUTES.LANDING} variant="button" color="textPrimary" href="#" noWrap className={styles.toolbarTitle}>
+        <Link to={ROUTES.LANDING} variant="button" color="textPrimary" href="#" className={styles.toolbarTitle}>
           easyEN
         </Link>
         <nav>

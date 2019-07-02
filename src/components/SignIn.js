@@ -10,7 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import GoogleButton from 'react-google-button';
 import { makeStyles } from '@material-ui/core/styles';
-import firebase from './FireBase/firebase';
+import { withFirebase } from './FireBase';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -38,46 +38,56 @@ const useStyles = makeStyles(theme => ({
   signInButton: { height: 50 },
 }));
 
-export default function SignIn() {
+const SignIn = (props) => {
   const styles = useStyles();
-  const [auth, setAuth] = useState({ email: '', password: '', error: false });
+  const [auth, setAuth] = useState({ email: '', password: '' });
+  const [authError, setError] = useState(null);
   const [form, toggleForm] = useState({ signIn: true, signUp: false, forgotPass: false });
+  const isInvalid =
+    auth.email === '' ||
+    auth.password === '';
 
-  function handleForm() {
+  const handleForm = () => {
     toggleForm({ ...form, signIn: !form.signIn, signUp: !form.signUp });
-  }
+    clearInputs();
+  };
 
-  function handleInputChange(event) {
+  const handleInputChange = (event) => {
     const { target: { name, value } } = event;
     setAuth({ ...auth, [name]: value });
-  }
+  };
+  const clearInputs = () => {
+    setAuth({ email: '', password: '', error: null });
+  };
 
-  function handleSignUp() {
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(auth.email, auth.password)
-      .then((user) => {
-        console.log(user.uid);
+  const handleSignUp = (event) => {
+    props.firebase
+      .doCreateUserWithEmailAndPassword(auth.email, auth.password)
+      .then(authUser => {
+        console.log(authUser);
+        clearInputs();
+      })
+      .catch(error => {
+        setError(error);
+      });
+    event.preventDefault();
+  };
+
+  const handleSignIn = (event) => {
+    props.firebase
+      .doSignInWithEmailAndPassword(auth.email, auth.password)
+      .then((authUser) => {
+        console.log(authUser);
+        clearInputs();
       })
       .catch((error) => {
-        setAuth(...auth, error);
+        setError(error);
         console.log(error);
       });
-  }
+    event.preventDefault();
+  };
 
-  function handleSignIn() {
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(auth.email, auth.password)
-      .then((user) => {
-        console.log(user.uid);
-      })
-      .catch((error) => {
-        setAuth(...auth, error);
-        console.log(error);
-      });
-  }
-
+  console.log(props, 'proooops');
   return (
     <div
       className={styles.paper}
@@ -120,7 +130,8 @@ export default function SignIn() {
           <FormControlLabel control={<Checkbox value="remember" color="primary"/>} label="Remember me"/>
           <Grid container className={styles.buttonsContainer}>
             <Grid item xs className={styles.signInContainer}>
-              <Button type="submit" fullWidth variant="contained" color="primary" className={styles.signInButton}
+              <Button disabled={isInvalid} type="button" fullWidth variant="contained" color="primary"
+                      className={styles.signInButton}
                       onClick={handleSignIn}>
                 Sign In
               </Button>
@@ -136,14 +147,14 @@ export default function SignIn() {
           </Grid>
           <Grid container>
             <Grid item xs>
-              <Link href="#" variant="body2">
+              <Button>
                 Forgot password?
-              </Link>
+              </Button>
             </Grid>
             <Grid>
-              <Link href="#" variant="body2" onClick={handleForm}>
+              <Button onClick={handleForm}>
                 {'Don\'t have an account? Sign Up'}
-              </Link>
+              </Button>
             </Grid>
           </Grid>
         </form>
@@ -189,6 +200,8 @@ export default function SignIn() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                onChange={handleInputChange}
+                value={auth.email}
               />
             </Grid>
             <Grid item xs={12}>
@@ -201,6 +214,8 @@ export default function SignIn() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                onChange={handleInputChange}
+                value={auth.password}
               />
             </Grid>
             <Grid item xs={12}>
@@ -211,24 +226,25 @@ export default function SignIn() {
             </Grid>
           </Grid>
           <Button
-            type="submit"
+            type="button"
             fullWidth
             variant="contained"
             color="primary"
             className={styles.submit}
-            onClick={() => handleSignUp()}
+            onClick={handleSignUp}
           >
             Sign Up
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href="#" variant="body2" onClick={handleForm}>
+              <Button onClick={handleForm}>
                 Already have an account? Sign in
-              </Link>
+              </Button>
             </Grid>
           </Grid>
         </form>
       </> : null}
     </div>
   );
-}
+};
+export default withFirebase(SignIn);
