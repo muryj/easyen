@@ -4,13 +4,14 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import GoogleButton from 'react-google-button';
+import Zoom from '@material-ui/core/Zoom';
 import { makeStyles } from '@material-ui/core/styles';
 import { withFirebase } from './FireBase';
+import CustomSnack from './SnackBar';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -36,16 +37,26 @@ const useStyles = makeStyles(theme => ({
   buttonsContainer: { marginBottom: 40, marginTop: 40 },
   signInContainer: { marginRight: 15 },
   signInButton: { height: 50 },
+  signUpButton: { height: 50, marginBottom: 40, marginTop: 40 },
 }));
 
 const SignIn = (props) => {
   const styles = useStyles();
   const [auth, setAuth] = useState({ email: '', password: '' });
-  const [authError, setError] = useState(null);
+  const [authError, setError] = useState({ error: false, errorBody: {} });
   const [form, toggleForm] = useState({ signIn: true, signUp: false, forgotPass: false });
+
   const isInvalid =
     auth.email === '' ||
     auth.password === '';
+
+  const clearInputs = () => {
+    setAuth({ email: '', password: '', error: null });
+  };
+
+  const clearErrors = () => {
+    setError({ error: false, errorBody: {} });
+  };
 
   const handleForm = () => {
     toggleForm({ ...form, signIn: !form.signIn, signUp: !form.signUp });
@@ -53,12 +64,19 @@ const SignIn = (props) => {
   };
 
   const handleInputChange = (event) => {
+    event.preventDefault();
+    clearErrors();
     const { target: { name, value } } = event;
     setAuth({ ...auth, [name]: value });
   };
-  const clearInputs = () => {
-    setAuth({ email: '', password: '', error: null });
+
+  const handleInputFocus = (event) => {
+    event.preventDefault();
+    clearErrors();
+    const { target: { name } } = event;
+    setAuth({ ...auth, [name]: '' });
   };
+
 
   const handleSignUp = (event) => {
     props.firebase
@@ -68,7 +86,8 @@ const SignIn = (props) => {
         clearInputs();
       })
       .catch(error => {
-        setError(error);
+        console.log(error);
+        setError({ error: true, errorBody: error });
       });
     event.preventDefault();
   };
@@ -81,13 +100,15 @@ const SignIn = (props) => {
         clearInputs();
       })
       .catch((error) => {
-        setError(error);
         console.log(error);
+        setError({ error: true, errorBody: error });
       });
     event.preventDefault();
   };
 
   console.log(props, 'proooops');
+
+
   return (
     <div
       className={styles.paper}
@@ -101,6 +122,7 @@ const SignIn = (props) => {
         </Typography>
         <form className={styles.form} noValidate>
           <TextField
+            error={authError.errorBody.code === 'auth/invalid-email'}
             variant="outlined"
             margin="normal"
             required
@@ -111,9 +133,11 @@ const SignIn = (props) => {
             autoComplete="email"
             autoFocus
             onChange={handleInputChange}
+            onFocus={handleInputFocus}
             value={auth.email}
           />
           <TextField
+            error={authError.errorBody.code === 'auth/wrong-password'}
             variant="outlined"
             margin="normal"
             required
@@ -124,6 +148,7 @@ const SignIn = (props) => {
             id="password"
             autoComplete="current-password"
             onChange={handleInputChange}
+            onFocus={handleInputFocus}
             value={auth.password}
           />
 
@@ -167,64 +192,40 @@ const SignIn = (props) => {
           Sign up
         </Typography>
         <form className={styles.form} noValidate>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                autoComplete="fname"
-                name="firstName"
-                variant="outlined"
-                required
-                fullWidth
-                id="firstName"
-                label="First Name"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                autoComplete="lname"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                onChange={handleInputChange}
-                value={auth.email}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                onChange={handleInputChange}
-                value={auth.password}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary"/>}
-                label="I want to receive inspiration, marketing promotions and updates via email."
-              />
-            </Grid>
-          </Grid>
+          <TextField
+            error={authError.errorBody.code === 'auth/invalid-email'}
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            onChange={handleInputChange}
+            onFocus={handleInputFocus}
+            value={auth.email}
+          />
+          <TextField
+            error={authError.errorBody.code === 'auth/wrong-password'}
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            onChange={handleInputChange}
+            onFocus={handleInputFocus}
+            value={auth.password}
+          />
+          <FormControlLabel
+            control={<Checkbox value="allowExtraEmails" color="primary"/>}
+            label="I want to receive inspiration, marketing promotions and updates via email."
+          />
           <Button
             type="button"
             fullWidth
@@ -232,6 +233,7 @@ const SignIn = (props) => {
             color="primary"
             className={styles.submit}
             onClick={handleSignUp}
+            className={styles.signUpButton}
           >
             Sign Up
           </Button>
@@ -244,6 +246,13 @@ const SignIn = (props) => {
           </Grid>
         </form>
       </> : null}
+      <Zoom in={authError.error} style={{ width: '80%', marginTop: 20 }}>
+        <CustomSnack
+          onClose={clearErrors}
+          variant="error"
+          message={authError.errorBody.message}
+        />
+      </Zoom>
     </div>
   );
 };
