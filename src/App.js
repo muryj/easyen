@@ -11,16 +11,15 @@ import { withFirebase } from './components/FireBase';
 import Header from './components/Header';
 import LandingPage from './components/LandingPage';
 import CoursesPage from './components/CoursesPage';
+import ProfilePage from './components/ProfilePage';
 
 function App(props) {
   const [displaySignIn, toggleSignIn] = useState(false);
   const [authUser, setAuthUser] = useState(null);
 
   useEffect(() => {
-    console.log('lol');
     if (!authUser) {
       props.firebase.auth.onAuthStateChanged(user => {
-        console.log(user);
         if (!authUser) {
           setAuthUser(user);
         } else {
@@ -34,18 +33,18 @@ function App(props) {
     toggleSignIn(!displaySignIn);
   }
 
-  console.log(authUser);
   return (
     <div className="App">
       <Slide direction="right" in={displaySignIn} timeout={1000} style={{ position: 'absolute', zIndex: 2 }}>
         <div>
-          <SignIn/>
+          <SignIn toggleSignIn={toggleLogin} displaySignIn={displaySignIn}/>
         </div>
       </Slide>
       <Router>
         <Header toggleSignIn={toggleLogin} authUser={authUser}/>
         <Route exact path={ROUTES.LANDING} component={LandingPage}/>
         <Route path={ROUTES.COURSES} component={CoursesPage}/>
+        <Route path={ROUTES.PROFILE} component={ProfilePage}/>
       </Router>
     </div>
   );

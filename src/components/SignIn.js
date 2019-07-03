@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -46,9 +46,33 @@ const SignIn = (props) => {
   const [authError, setError] = useState({ error: false, errorBody: {} });
   const [form, toggleForm] = useState({ signIn: true, signUp: false, forgotPass: false });
 
+
   const isInvalid =
     auth.email === '' ||
     auth.password === '';
+
+
+  function useOutsideAlerter(ref) {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        props.toggleSignIn(false);
+      }
+    }
+
+    useEffect(() => {
+      if (props.displaySignIn) {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+        };
+      }
+      return undefined;
+    });
+  }
+
+  const wrapperRef = useRef(null);
+  useOutsideAlerter(wrapperRef);
+
 
   const clearInputs = () => {
     setAuth({ email: '', password: '', error: null });
@@ -98,6 +122,7 @@ const SignIn = (props) => {
       .then((authUser) => {
         console.log(authUser);
         clearInputs();
+        props.toggleSignIn();
       })
       .catch((error) => {
         console.log(error);
@@ -111,6 +136,7 @@ const SignIn = (props) => {
 
   return (
     <div
+      ref={wrapperRef}
       className={styles.paper}
     >
       {form.signIn ? <>
