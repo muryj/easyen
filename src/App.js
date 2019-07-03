@@ -8,6 +8,7 @@ import {
 import * as ROUTES from './constants/routes';
 import SignIn from './components/SignIn';
 import { withFirebase } from './components/FireBase';
+import { AuthUserContext } from './components/Session';
 import Header from './components/Header';
 import LandingPage from './components/LandingPage';
 import CoursesPage from './components/CoursesPage';
@@ -34,19 +35,21 @@ function App(props) {
   }
 
   return (
-    <div className="App">
-      <Slide direction="right" in={displaySignIn} timeout={1000} style={{ position: 'absolute', zIndex: 2 }}>
-        <div>
-          <SignIn toggleSignIn={toggleLogin} displaySignIn={displaySignIn}/>
-        </div>
-      </Slide>
-      <Router>
-        <Header toggleSignIn={toggleLogin} authUser={authUser}/>
-        <Route exact path={ROUTES.LANDING} component={LandingPage}/>
-        <Route path={ROUTES.COURSES} component={CoursesPage}/>
-        <Route path={ROUTES.PROFILE} component={ProfilePage}/>
-      </Router>
-    </div>
+    <AuthUserContext.Provider value={authUser}>
+      <div className="App">
+        <Slide direction="right" in={displaySignIn} timeout={1000} style={{ position: 'absolute', zIndex: 2 }}>
+          <div>
+            <SignIn toggleSignIn={toggleLogin} displaySignIn={displaySignIn}/>
+          </div>
+        </Slide>
+        <Router>
+          <Header toggleSignIn={toggleLogin}/>
+          <Route exact path={ROUTES.LANDING} component={LandingPage}/>
+          <Route path={ROUTES.COURSES} component={CoursesPage}/>
+          <Route path={ROUTES.PROFILE} component={ProfilePage}/>
+        </Router>
+      </div>
+    </AuthUserContext.Provider>
   );
 }
 

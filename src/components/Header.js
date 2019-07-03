@@ -8,8 +8,10 @@ import IconButton from '@material-ui/core/IconButton';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
+import { compose } from 'recompose';
 import * as ROUTES from '../constants/routes';
 import { withFirebase } from './FireBase';
+import { withAuthentication } from './Session';
 import images from '../theme/images';
 
 const useStyles = makeStyles(theme => ({
@@ -34,16 +36,19 @@ const useStyles = makeStyles(theme => ({
   logo: {
     width: 70, height: 70,
   },
+  navigation: {
+    flexDirection: 'row',
+  },
 }));
 
-const Header = (props) => {
-  const { firebase } = props;
+const HeaderForm = (props) => {
+  const { firebase, authUser, toggleSignIn, history } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
   function handleMenu(event) {
-    event.preventDefault();
     setAnchorEl(event.currentTarget);
+    event.preventDefault();
   }
 
   function handleClose() {
@@ -58,7 +63,7 @@ const Header = (props) => {
           aria-label="Account of current user"
           aria-controls="menu-appbar"
           aria-haspopup="true"
-          onClick={() => props.history.push(ROUTES.LANDING)}
+          onClick={() => history.push(ROUTES.LANDING)}
           color="inherit"
           size="medium"
         >
@@ -66,50 +71,52 @@ const Header = (props) => {
         </IconButton>
         <nav>
           <Button color="primary" className={styles.link}
-                  onClick={() => props.history.push(ROUTES.COURSES)}>
+                  onClick={() => history.push(ROUTES.COURSES)}>
             Курсы
           </Button>
-
-          {props.authUser ?
-            <div>
-              <IconButton
-                aria-label="Account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-                size="medium"
-              >
-                <AccountCircle/>
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={open}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={() => props.history.push(ROUTES.PROFILE)}>Мой профиль</MenuItem>
-                <MenuItem onClick={handleClose}>Настройки</MenuItem>
-                <MenuItem onClick={firebase.doSignOut}>Выйти</MenuItem>
-              </Menu>
-            </div> :
-            <Button color="primary" variant="outlined" className={styles.link}
-                    onClick={() => props.toggleSignIn()}>
-              Login
-            </Button>
-          }
         </nav>
+        {authUser ?
+          <div>
+            <IconButton
+              aria-label="Account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+              size="medium"
+            >
+              <AccountCircle/>
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={open}
+              onClose={handleClose}
+            >
+              <MenuItem onClick={() => history.push(ROUTES.PROFILE)}>Мой профиль</MenuItem>
+              <MenuItem onClick={handleClose}>Настройки</MenuItem>
+              <MenuItem onClick={firebase.doSignOut}>Выйти</MenuItem>
+            </Menu>
+          </div> :
+          <Button color="primary" variant="outlined" className={styles.link}
+                  onClick={() => toggleSignIn()}>
+            Login
+          </Button>
+        }
       </Toolbar>
     </AppBar>
   );
 };
-export default withRouter(withFirebase(Header));
+
+const Header = compose(withAuthentication, withRouter, withFirebase)(HeaderForm);
+
+export default Header;
