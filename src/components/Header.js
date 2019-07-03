@@ -37,6 +37,7 @@ const Header = (props) => {
   const open = Boolean(anchorEl);
 
   function handleMenu(event) {
+    event.preventDefault();
     setAnchorEl(event.currentTarget);
   }
 

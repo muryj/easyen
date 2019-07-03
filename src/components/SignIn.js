@@ -108,6 +108,7 @@ const SignIn = (props) => {
       .then(authUser => {
         console.log(authUser);
         clearInputs();
+        props.toggleSignIn();
       })
       .catch(error => {
         console.log(error);
