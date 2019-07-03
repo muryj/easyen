@@ -23,6 +23,7 @@
     "react/jsx-filename-extension": ["off"],
     "react/prop-types": ["warn"],
     "no-return-assign": ["off"],
-    "semi": ["warn"]
+    "semi": ["warn"],
+    "global-require": ["off"]
   }
 }
